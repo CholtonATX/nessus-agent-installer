@@ -8,8 +8,12 @@ getHostInfo(){
         OS_CNAME=$(lsb_release -sc|tr '[:upper:]' '[:lower:]')
         OS_DESC=$(lsb_release -sd|tr '[:upper:]' '[:lower:]')
     elif [[ -f /etc/os-release ]]; then
-        if grep -q "Rocky Linux 8"; then
         # source /etc/os-release
+        # OS=$(echo $DISTRIB_ID |tr '[:upper:]' '[:lower:]')
+        # OS_VER=$(echo $DISTRIB_RELEASE |tr -d '.')
+        # OS_CNAME=$(echo $DISTRIB_CODENAME |tr '[:upper:]' '[:lower:]')
+        # OS_DESC=$(echo $DISTRIB_DESCRIPTION |tr '[:upper:]' '[:lower:]')
+        source /etc/os-release
         OS=$(echo $DISTRIB_ID |tr '[:upper:]' '[:lower:]')
         OS_VER=$(echo $DISTRIB_RELEASE |tr -d '.')
         OS_CNAME=$(echo $DISTRIB_CODENAME |tr '[:upper:]' '[:lower:]')
@@ -28,16 +32,16 @@ getHostInfo(){
 }
 
 downloadAgent(){
-    filePrefix="NessusAgent-10.3.1"
+    filePrefix="NessusAgent-6.10.7"
     fileDelim="."
     if [ ! -z $OS ] && [ ! -z $OS_VER ]; then
         case $OS in
             "ubuntu" )
                 case $OS_VER in
-                    1404 | 1604 | 1804 |2004 | 2204 )
-                        OS_FILE="ubuntu1404"
+                    1110 | 1204 | 1210 | 1304 | 1310 | 1404 | 1604 |1704)
+                        OS_FILE="ubuntu1110"
                     ;;
-                    910 | 1004 | 1104)
+                    910 | 1004 )
                         OS_FILE="ubuntu910"
                     ;;
                     * )
@@ -50,8 +54,8 @@ downloadAgent(){
             ;;
             "debian" )
                 case $OS_VER in
-                    10 | 11 )
-                        OS_FILE="debian10"
+                    6 | 7 | 8 )
+                        OS_FILE="debian6"
                         fileExt="deb"
                     ;;
                     * )
@@ -60,23 +64,22 @@ downloadAgent(){
                 esac
                 fileDelim="_"
                 fileExt="deb"
+            ;;
+            "fedora" )
+                case $OS_VER in
+                    20 | 21 )
+                        OS_FILE="fc20"
+                    ;;
+                    * )
+                        echo "Unsupported version $OS - $OS_VER"
+                        exit 1
+                esac
+                fileExt="rpm"
                 ARCH=$(echo $ARCH |sed -e 's/x86_64/amd64/')
             ;;
-            # "fedora" )
-            #     case $OS_VER in
-            #         20 | 21 )
-            #             OS_FILE="fc20"
-            #         ;;
-            #         * )
-            #             echo "Unsupported version $OS - $OS_VER"
-            #             exit 1
-            #     esac
-            #     fileExt="rpm"
-            #     ARCH=$(echo $ARCH |sed -e 's/x86_64/amd64/')
-            # ;;
-            "centos" | "redhat" | "alma" | "rocky" )
+            "centos" | "redhat" )
                 case $OS_VER in
-                     8 | 9 )
+                    5 | 6 | 7 )
                         OS_FILE="es${OS_VER}"
                     ;;
                     * )
